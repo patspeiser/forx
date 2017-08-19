@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^2.1.0",
     "config-yml": "^0.8.0",
     "cross-env": "^5.0.5",
     "fixer-io-node": "^1.0.1",
