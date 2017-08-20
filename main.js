@@ -27,8 +27,6 @@ var Currency = db.define('currency', {
 	rates: { type: Sequelize.JSON }
 });
 
-var date = new SimpleDate(2000, 00, 00);
-var today = new SimpleDate(2017, 07, 19);
 var _incrementDay = function(date){
 	date.addDays(1)
 	return date.toString('yyyy-MM-dd');
@@ -40,7 +38,7 @@ var _setBaseCurrency = function(currency){
 };
 
 var _buildUrl = function(date, currency){
-	var dateToCheck = date.toString();
+	var dateToCheck = date.toString('yyyy-MM-dd');
 	var currencyType = _setBaseCurrency(currency);
 	dateToCheck.concat(currencyType)
 	return dateToCheck.concat(currencyType); 
@@ -75,23 +73,40 @@ var UPDATE_CURRENCIES = function(endpoint){
 var UPDATE_HISTORICAL = function(endpoint){
 	return fixer.historical(endpoint)
 	.then(function(result){
+		console.log('!@#$#@!@#');
 		return Currency.create(result);
 	}).catch(function(error){
-		//console.log(chalk.red(error));
+		return console.log(chalk.red(error));
 	});
 }
 
-UPDATE_HISTORICAL(_buildUrl(date, 'USD'));
-
-var currencyList = ['USD','JPY', 'EUR', 'NZD', 'PLN'];
+var fromDate = new SimpleDate(2000, 00, 00);
+var toDate = new SimpleDate(2017, 07, 19);
+/*
+var currencyList = ['USD']; //,'JPY', 'EUR', 'NZD', 'PLN'];
 while (date.toString('yyyy-MM-dd') != today.toString('yyyy-MM-dd')){
-	console.log(date.toString('yyyy-MM-dd'), today.toString('yyyy-MM-dd'));
-	currencyList.forEach( function(currency){
-		//UPDATE_HISTORICAL(_buildUrl(date, currency));
-	});
+		currencyList.forEach( function(currency){
+//			UPDATE_HISTORICAL(_buildUrl(date, currency));
+		});
+		_incrementDay(date);
+};
+*/
+fromDate.toString('yyyy-MM-dd');
+toDate.toString('yyyy-MM-dd');
+
+for (fromDate; fromDate.toString('yyyy-MM-dd') != toDate.toString('yyyy-MM-dd'); fromDate.addDays(1)){
+	console.log(fromDate.toString('yyyy-MM-dd'), toDate.toString('yyyy-MM-dd'))
+	UPDATE_HISTORICAL(_buildUrl(fromDate, 'USD'));
+}
+var currencyList = ['USD']; //,'JPY', 'EUR', 'NZD', 'PLN'];
+if (!date){
+	while (date.toString('yyyy-MM-dd') != today.toString('yyyy-MM-dd')){
+		UPDATE_HISTORICAL(_buildUrl(date, currency));
 	_incrementDay(date);
 };
 
-//_incrementDay(date)
+} else {
+
+}
 //socket server instead of cron? 
-//console.log(date.toString());
+//UPDATE_HISTORICAL(_buildUrl(date, 'USD'));
