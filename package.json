@@ -16,6 +16,7 @@
     "fixer-io-node": "^1.0.1",
     "pg": "^7.1.2",
     "sequelize": "^4.4.7",
+    "simple-datejs": "^1.0.0",
     "xlsx": "^0.11.2"
   }
 }

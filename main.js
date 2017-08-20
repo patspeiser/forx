@@ -1,11 +1,11 @@
 const fixer = require('fixer-io-node');
 const Sequelize = require('sequelize');
-const db = new Sequelize('postgres://postgres:postgres@localhost/forx'/*, {logging: false}*/);
+const db = new Sequelize('postgres://postgres:postgres@localhost/forx', {logging: false});
 var chalk = require('chalk');
-//var XLSX = require('xlsx');
-//var workbook = XLSX.readFile('./data_sets/Exchange_Rate_Report.xls');
-//console.log(workbook);
+var SimpleDate = require('simple-datejs');
 
+
+/*
 var data = { 
 	base: 'EUR',              
 	date: '2017-08-17',       
@@ -18,52 +18,54 @@ var data = {
 		ZAR: 15.442 
 	} 
 };
+*/
 
-
-	db.sync({force: true});
-		
-	var Currency = db.define('currency', {
-		base: { type: Sequelize.STRING },
-		date: { type: Sequelize.STRING },
-		rates: { type: Sequelize.JSON }
-	});
-
-/*
-var reducer = function(obj){
-	dataSet = obj.rates;
-	var formattedData = Object.keys(obj).reduce(function(hash, currentValue, currentIndex, array){
+db.sync(/*{force: true}*/);
 	
-		##haven't seen the key (currentValue)? adds key to hash
-		##have seen the key appened to the array for its hash value.
+var Currency = db.define('currency', {
+	base: { type: Sequelize.STRING },
+	date: { type: Sequelize.STRING },
+	rates: { type: Sequelize.JSON }
+});
+var x = 0;
 
-		if ( Object.keys(hash).indexOf(currentValue) < 0 ) {
-			hash[ currentValue ] = [ dataSet[currentValue] ] ;
-			return hash;
-		}
-		hash[ currentValue ].push(dataSet[currentValue]);
-		return hash;
-	}, {});
-	return formattedData;
+//while(x<50){
+//while	x++;
+	var date = new SimpleDate(2000, 0, 0);
+	date.addDays(25);
+	console.log(date.toString('yyyy-MM-dd'));
+	//console.log(date.getDate() + 1);
+	//console.log(date);
+	//date.setDate(date.getDate() + x) / 1000;
+	//console.log(date);
+//}
+//viar startDate = Date.UTC(2000, 01, 01) / 1000;
+//console.log(startDate);
+var latest = 'latest?base=USD';
+var historical = '2001-09-12?base=USD';
+/*
+var UPDATE_CURRENCIES = function(endpoint){
+	fixer.latest(endpoint).then(function(result){
+		return Object.keys(data).forEach(function(key){
+			return Currency.create({
+				base:  result.base,
+				rates: result.rates,
+				date:  result.date
+			})
+		})
+	}).catch( function(error){
+		console.log(chalk.red(error));
+	});
+};
+*/
+/*
+var UPDATE_HISTORICAL = function(endpoint){
+	fixer.
 }
 */
 
-var base = 'latest?base=USD';
-
-fixer.latest('latest?base=USD').then(function(result){
-	Object.keys(data).forEach(function(keyValue){
-		var otherCurrencyQuote = data[keyValue][0];
-		return Currency.create({
-					base:  result.base,
-					rates: result.rates,
-					date:  result.date
-				})
-	})
-}).then(function(currency){
-	console.log(chalk.blue(currency));
-}).catch( function(){
-   	console.log(chalk.red(error));
-});
-
+//UPDATE_CURRENCIES(historical);
+//UPDATE__(historical);
 
 
 
