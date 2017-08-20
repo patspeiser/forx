@@ -4,9 +4,8 @@ const db = new Sequelize('postgres://postgres:postgres@localhost/forx', {logging
 var chalk = require('chalk');
 var SimpleDate = require('simple-datejs');
 
-
 /*
-var data = { 
+{ 
 	base: 'EUR',              
 	date: '2017-08-17',       
 	rates:                    
@@ -27,26 +26,31 @@ var Currency = db.define('currency', {
 	date: { type: Sequelize.STRING },
 	rates: { type: Sequelize.JSON }
 });
-var x = 0;
 
-//while(x<50){
-//while	x++;
-	var date = new SimpleDate(2000, 0, 0);
-	date.addDays(25);
-	console.log(date.toString('yyyy-MM-dd'));
-	//console.log(date.getDate() + 1);
-	//console.log(date);
-	//date.setDate(date.getDate() + x) / 1000;
-	//console.log(date);
-//}
-//viar startDate = Date.UTC(2000, 01, 01) / 1000;
-//console.log(startDate);
-var latest = 'latest?base=USD';
-var historical = '2001-09-12?base=USD';
-/*
+var date = new SimpleDate(2000, 00, 00);
+//date = date.toString('yyyy-MM-dd') 
+//date = date.toString('yyyy-MM-dd');
+
+var _incrementDay = function(date){
+	date.addDays(1)
+	return date.toString('yyyy-MM-dd');
+};
+
+//Base currency  
+var _setBaseCurrency = function(currency){
+	return '?base='+ currency.toUpperCase();
+};
+var _buildUrl = function(date, currency){
+	var dateToCheck = _incrementDay(date);
+	var currencyType = _setBaseCurrency(currency);
+	dateToCheck.concat(currencyType)
+	return dateToCheck.concat(currencyType); 
+};
+
+
 var UPDATE_CURRENCIES = function(endpoint){
 	fixer.latest(endpoint).then(function(result){
-		return Object.keys(data).forEach(function(key){
+		return Object.keys(result).forEach(function(key){
 			return Currency.create({
 				base:  result.base,
 				rates: result.rates,
@@ -57,16 +61,19 @@ var UPDATE_CURRENCIES = function(endpoint){
 		console.log(chalk.red(error));
 	});
 };
-*/
-/*
+
 var UPDATE_HISTORICAL = function(endpoint){
-	fixer.
+	fixer.historical(endpoint)
+	.then(function(result){
+		//save to DB
+		console.log(result);
+	}).catch(function(error){
+		console.log(error);
+	})
 }
-*/
+	
 
-//UPDATE_CURRENCIES(historical);
-//UPDATE__(historical);
-
+UPDATE_HISTORICAL(_buildUrl(date, 'USD'));
 
 
 
