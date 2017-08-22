@@ -1,8 +1,19 @@
 const fixer = require('fixer-io-node');
 const Sequelize = require('sequelize');
 const db = new Sequelize('postgres://postgres:postgres@localhost/forx', {logging: false});
-var chalk = require('chalk');
-var SimpleDate = require('simple-datejs');
+const chalk = require('chalk');
+const datejs = require('./date.js');
+const request = require('request');
+const sleep = require('sleep').sleep;
+
+var Currency = db.define('currency', {
+	base: { type: Sequelize.STRING },
+	date: { type: Sequelize.STRING },
+	rates: { type: Sequelize.JSON }
+})
+
+//psql db forx table currencies
+db.sync(/*{force: true}*/);
 
 /*
 { 
@@ -18,95 +29,85 @@ var SimpleDate = require('simple-datejs');
 	} 
 };
 */
+var startConfig = {year: 2000, month: 00, day: 01};
+var startDate = new Date.today().set(startConfig)//.toString('yyyy-MM-dd');
+var startDateString = startDate.toString('yyyy-MM-dd');
 
-db.sync({force: true});
+var endConfig = {year: 2017, month: 07, day: 01};
+var endDate = new Date.today().set(endConfig)//.toString('yyyy-MM-dd')
+var endDateString = endDate.toString('yyyy-MM-dd');
+
+var requestUrl = 'http://api.fixer.io/' + startDateString + '?base=USD';
+var startDateEpoch = (new Date(startDate)).getTime() / 1000;
+var endDateEpoch = (new Date(endDate)).getTime() / 1000;
+
+var oneDay = 60 * 60 * 24;
+
+for (startDateEpoch; startDateEpoch < endDateEpoch; (startDateEpoch += oneDay)){
+	console.log(startDateEpoch, endDateEpoch, oneDay);
+	console.log(startDateEpoch);
+}
+
+
+
+/*
+
+var fromDate = {
+	day: 1,
+	month: 1,
+	year: 2000
+}
+//make these a class
+var toDate = {
+	day: 30,
+	month: 11,
+	year: 2000
+}
+
 	
-var Currency = db.define('currency', {
-	base: { type: Sequelize.STRING },
-	date: { type: Sequelize.STRING },
-	rates: { type: Sequelize.JSON }
-});
-
-var _incrementDay = function(date){
-	date.addDays(1)
-	return date.toString('yyyy-MM-dd');
+function _incrementDay(date){
+	return date.add({days: 1});
 };
 
-//Base currency  
-var _setBaseCurrency = function(currency){
-	return '?base='+ currency.toUpperCase();
+function _setBaseCurrency(currency){
+	return '?base='+ currency.toUpperCase;
 };
 
-var _buildUrl = function(date, currency){
-	var dateToCheck = date.toString('yyyy-MM-dd');
-	var currencyType = _setBaseCurrency(currency);
-	dateToCheck.concat(currencyType)
-	return dateToCheck.concat(currencyType); 
-};
-
-/*
-var _dateCheck = function(startTime, endTime){
-	this.startTime = startTime ||'2000-12-30';
-	while(startTime < endTime ){
-		startTime = _incrementDay(startTime);
-	}
-	return startTime;
-}
-
-
-var UPDATE_CURRENCIES = function(endpoint){
-	fixer.latest(endpoint)
-	.then(function(result){
-		return Object.keys(result).forEach(function(key){
-			return Currency.create({
-				base:  result.base,
-				rates: result.rates,
-				date:  result.date
-			})
+function _makeRequest(requestUrl){
+	request(requestUrl, function(error, response, body){
+		if (error) throw error;
+		var body = JSON.parse(body);
+		console.log(body);
+		return Currency.create({
+			base: body.base,
+			rates: body.rates,
+			date: body.date
+		}).then(function(){
+			console.log('finished')
 		})
-	}).catch( function(error){
-		console.log(chalk.red(error));
 	});
 };
-*/
 
-var UPDATE_HISTORICAL = function(endpoint){
-	return fixer.historical(endpoint)
-	.then(function(result){
-		console.log('!@#$#@!@#');
-		return Currency.create(result);
-	}).catch(function(error){
-		return console.log(chalk.red(error));
-	});
-}
+var fromDate = Date.today().set(fromDate);
+var toDate = Date.today().set(toDate);
 
-var fromDate = new SimpleDate(2000, 00, 00);
-var toDate = new SimpleDate(2017, 07, 19);
-/*
-var currencyList = ['USD']; //,'JPY', 'EUR', 'NZD', 'PLN'];
-while (date.toString('yyyy-MM-dd') != today.toString('yyyy-MM-dd')){
-		currencyList.forEach( function(currency){
-//			UPDATE_HISTORICAL(_buildUrl(date, currency));
-		});
-		_incrementDay(date);
-};
-*/
-fromDate.toString('yyyy-MM-dd');
-toDate.toString('yyyy-MM-dd');
-
-for (fromDate; fromDate.toString('yyyy-MM-dd') != toDate.toString('yyyy-MM-dd'); fromDate.addDays(1)){
-	console.log(fromDate.toString('yyyy-MM-dd'), toDate.toString('yyyy-MM-dd'))
-	UPDATE_HISTORICAL(_buildUrl(fromDate, 'USD'));
-}
-var currencyList = ['USD']; //,'JPY', 'EUR', 'NZD', 'PLN'];
-if (!date){
-	while (date.toString('yyyy-MM-dd') != today.toString('yyyy-MM-dd')){
-		UPDATE_HISTORICAL(_buildUrl(date, currency));
-	_incrementDay(date);
+function _buildUrl(endpoint, date, currency){
+	this.endpoint = endpoint;
+	this.dateString = date.toString('yyyy-MM-dd');
+	this.currency = currency.toUpperCase;
+	return this.endpoint + this.dateString + '?base=' + currency;
 };
 
-} else {
-
+function run(from, till, currency){
+	var requestUrl = _buildUrl('http://api.fixer.io/', from, currency);
+	for (var d = from ; d <= toDate; d.add({days: 1})){
+		console.log('startdate', d, toDate);
+		_makeRequest(requestUrl);
+		sleep(1);
+	}
 }
-//socket server instead of cron? 
-//UPDATE_HISTORICAL(_buildUrl(date, 'USD'));
+console.log('starting...');
+console.log(fromDate, toDate);
+run(fromDate, toDate, 'USD');
+
+*/
