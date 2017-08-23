@@ -15,6 +15,13 @@ var Currency = db.define('currency', {
 //psql db forx table currencies
 db.sync(/*{force: true}*/);
 
+const express = require('express');
+const app = express();
+const path = require('path');
+const socket = require('socket.io-client')(process.env.SOCKET_SERVER || 'http://localhost:3000');
+const server = require( path.join(__dirname + '/server.js') );
+module.exports = app;
+
 /*
 { 
 	base: 'EUR',              
@@ -32,82 +39,47 @@ db.sync(/*{force: true}*/);
 var startConfig = {year: 2000, month: 00, day: 01};
 var startDate = new Date.today().set(startConfig)//.toString('yyyy-MM-dd');
 var startDateString = startDate.toString('yyyy-MM-dd');
+var startDateEpoch = (new Date(startDate)).getTime() / 1000;
 
 var endConfig = {year: 2017, month: 07, day: 01};
 var endDate = new Date.today().set(endConfig)//.toString('yyyy-MM-dd')
 var endDateString = endDate.toString('yyyy-MM-dd');
-
-var requestUrl = 'http://api.fixer.io/' + startDateString + '?base=USD';
-var startDateEpoch = (new Date(startDate)).getTime() / 1000;
 var endDateEpoch = (new Date(endDate)).getTime() / 1000;
+var date = new Date(startDateEpoch * 1000);
 
-var oneDay = 60 * 60 * 24;
-
-for (startDateEpoch; startDateEpoch < endDateEpoch; (startDateEpoch += oneDay)){
-	console.log(startDateEpoch, endDateEpoch, oneDay);
-	console.log(startDateEpoch);
+function getRequestUrl(date){
+	var requestUrl = 'http://api.fixer.io/' + date.toString('yyyy-MM-dd') + '?base=USD';
+	date.add({days: 1});
+	return requestUrl;
 }
 
-
-
-/*
-
-var fromDate = {
-	day: 1,
-	month: 1,
-	year: 2000
-}
-//make these a class
-var toDate = {
-	day: 30,
-	month: 11,
-	year: 2000
-}
-
-	
-function _incrementDay(date){
-	return date.add({days: 1});
-};
-
-function _setBaseCurrency(currency){
-	return '?base='+ currency.toUpperCase;
-};
-
-function _makeRequest(requestUrl){
-	request(requestUrl, function(error, response, body){
-		if (error) throw error;
+socket.on('do', function(){
+	console.log(chalk.cyan(startDate, endDate, date));
+	var requestUrl = getRequestUrl(date);
+	console.log(chalk.yellow(requestUrl));
+	return request(requestUrl, function(error, headers, body){
 		var body = JSON.parse(body);
-		console.log(body);
 		return Currency.create({
 			base: body.base,
 			rates: body.rates,
 			date: body.date
-		}).then(function(){
-			console.log('finished')
-		})
+		}).then(function(currency){
+			console.log('record created')});
+			return currency;
 	});
+});
+/*
+{ 
+	base: 'EUR',              
+	date: '2017-08-17',       
+	rates:                    
+	{ AUD: 1.4756,           
+		BGN: 1.9558,           
+		DKK: 7.4354,           
+		GBP: 0.90895,          
+		HKD: 9.1517,           
+		ZAR: 15.442 
+	} 
 };
-
-var fromDate = Date.today().set(fromDate);
-var toDate = Date.today().set(toDate);
-
-function _buildUrl(endpoint, date, currency){
-	this.endpoint = endpoint;
-	this.dateString = date.toString('yyyy-MM-dd');
-	this.currency = currency.toUpperCase;
-	return this.endpoint + this.dateString + '?base=' + currency;
-};
-
-function run(from, till, currency){
-	var requestUrl = _buildUrl('http://api.fixer.io/', from, currency);
-	for (var d = from ; d <= toDate; d.add({days: 1})){
-		console.log('startdate', d, toDate);
-		_makeRequest(requestUrl);
-		sleep(1);
-	}
-}
-console.log('starting...');
-console.log(fromDate, toDate);
-run(fromDate, toDate, 'USD');
-
 */
+
