@@ -49,12 +49,19 @@ var date = new Date(startDateEpoch * 1000);
 
 function getRequestUrl(date){
 	var requestUrl = 'http://api.fixer.io/' + date.toString('yyyy-MM-dd') + '?base=USD';
-	date.add({days: 1});
+	date.add({days:1});
 	return requestUrl;
 }
 
+ 
 socket.on('do', function(){
 	console.log(chalk.cyan(startDate, endDate, date));
+	
+	//if we get to the end bail
+	if (date.toString('yyyy-MM-dd') == endDate.toString('yyyy-MM-dd')) {console.log( 'reached endDate' ); return}; 
+
+	//make request to get currency data
+	// tried turning this to find or create but gave up and reverted
 	var requestUrl = getRequestUrl(date);
 	console.log(chalk.yellow(requestUrl));
 	return request(requestUrl, function(error, headers, body){
@@ -63,22 +70,23 @@ socket.on('do', function(){
 			base: body.base,
 			rates: body.rates,
 			date: body.date
-		}).then(function(currency){
-			console.log('record created')});
-			return currency;
+		}).then(function(result){
+			console.log(date, '...created new record');
+			return result;
+		})
 	});
 });
 /*
 { 
-	base: 'EUR',              
+	base: 'eur',              
 	date: '2017-08-17',       
 	rates:                    
-	{ AUD: 1.4756,           
-		BGN: 1.9558,           
-		DKK: 7.4354,           
-		GBP: 0.90895,          
-		HKD: 9.1517,           
-		ZAR: 15.442 
+	{ aud: 1.4756,           
+		bgn: 1.9558,           
+		dkk: 7.4354,           
+		gbp: 0.90895,          
+		hkd: 9.1517,           
+		zar: 15.442 
 	} 
 };
 */

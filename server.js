@@ -13,4 +13,4 @@ server.listen(port, function(){
 setInterval(function(){
 	//console.log( chalk.blue( Date.now() ) )
 	io.emit('do', {})
-}, 1000);
+}, 2000);
