@@ -13,7 +13,7 @@ var Currency = db.define('currency', {
 })
 
 //psql db forx table currencies
-db.sync(/*{force: true}*/);
+//db.sync();
 
 const express = require('express');
 const app = express();
@@ -54,7 +54,7 @@ function getRequestUrl(date){
 }
 
  
-socket.on('do', function(){
+socket.on('_', function(){
 	console.log(chalk.cyan(startDate, endDate, date));
 	
 	//if we get to the end bail
