@@ -1,27 +1,17 @@
 const fixer = require('fixer-io-node');
-const Sequelize = require('sequelize');
-const db = new Sequelize('postgres://postgres:postgres@localhost/forx', {logging: false});
 const chalk = require('chalk');
 const datejs = require('./date.js');
 const request = require('request');
 const sleep = require('sleep').sleep;
-
-var Currency = db.define('currency', {
-	base: { type: Sequelize.STRING },
-	date: { type: Sequelize.STRING },
-	rates: { type: Sequelize.JSON }
-})
-
-//psql db forx table currencies
-//db.sync();
-
+const Util = require('./utils.js');
 const express = require('express');
 const app = express();
 const path = require('path');
 const socket = require('socket.io-client')(process.env.SOCKET_SERVER || 'http://localhost:3000');
 const server = require( path.join(__dirname + '/server.js') );
+const Currency = require('./db/index.js').models.Currency;
 module.exports = app;
-
+console.log(Currency);
 /*
 { 
 	base: 'EUR',              
@@ -36,16 +26,23 @@ module.exports = app;
 	} 
 };
 */
-var startConfig = {year: 2000, month: 00, day: 01};
-var startDate = new Date.today().set(startConfig)//.toString('yyyy-MM-dd');
-var startDateString = startDate.toString('yyyy-MM-dd');
-var startDateEpoch = (new Date(startDate)).getTime() / 1000;
 
-var endConfig = {year: 2017, month: 07, day: 01};
-var endDate = new Date.today().set(endConfig)//.toString('yyyy-MM-dd')
-var endDateString = endDate.toString('yyyy-MM-dd');
-var endDateEpoch = (new Date(endDate)).getTime() / 1000;
-var date = new Date(startDateEpoch * 1000);
+var configDate = {
+	start: {
+		startConfig: 		function(){ return {year: 2000, month: 00, day: 01} },
+		startDate: 			function(){ return new Date.today().set(this.startConfig) },//.toString('yyyy-MM-dd')
+		startDateString: 	function(){ return this.startDate().toString('yyyy-MM-dd') },
+		startDateEpoch: 	function(){ return new Date(this.startDate()).getTime() / 1000 }
+	},
+	end: {
+		endConfig: 			function(){ return {year: 2017, month: 07, day: 01} },
+	 	endDate: 			function(){ return new Date.today().set(this.endConfig) },//.toString('yyyy-MM-dd')
+		endDateString: 		function(){ return this.endDate().toString('yyyy-MM-dd') },
+		endDateEpoch: 		function(){ return new Date(endDate).getTime() / 1000 }
+	}
+}
+
+var date = new Date(configDate.start.startDateEpoch());
 
 function getRequestUrl(date){
 	var requestUrl = 'http://api.fixer.io/' + date.toString('yyyy-MM-dd') + '?base=USD';
@@ -53,7 +50,6 @@ function getRequestUrl(date){
 	return requestUrl;
 }
 
- 
 socket.on('_', function(){
 	console.log(chalk.cyan(startDate, endDate, date));
 	
