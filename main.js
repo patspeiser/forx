@@ -3,7 +3,7 @@ const chalk = require('chalk');
 const datejs = require('./date.js');
 const request = require('request');
 const sleep = require('sleep').sleep;
-const Util = require('./utils.js');
+const Utils = require('./utils.js');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -11,21 +11,7 @@ const socket = require('socket.io-client')(process.env.SOCKET_SERVER || 'http://
 const server = require( path.join(__dirname + '/server.js') );
 const Currency = require('./db/index.js').models.Currency;
 module.exports = app;
-console.log(Currency);
-/*
-{ 
-	base: 'EUR',              
-	date: '2017-08-17',       
-	rates:                    
-	{ AUD: 1.4756,           
-		BGN: 1.9558,           
-		DKK: 7.4354,           
-		GBP: 0.90895,          
-		HKD: 9.1517,           
-		ZAR: 15.442 
-	} 
-};
-*/
+
 
 var configDate = {
 	start: {
@@ -44,46 +30,25 @@ var configDate = {
 
 var date = new Date(configDate.start.startDateEpoch());
 
-function getRequestUrl(date){
-	var requestUrl = 'http://api.fixer.io/' + date.toString('yyyy-MM-dd') + '?base=USD';
-	date.add({days:1});
-	return requestUrl;
-}
-
-socket.on('_', function(){
-	console.log(chalk.cyan(startDate, endDate, date));
-	
-	//if we get to the end bail
-	if (date.toString('yyyy-MM-dd') == endDate.toString('yyyy-MM-dd')) {console.log( 'reached endDate' ); return}; 
-
-	//make request to get currency data
-	// tried turning this to find or create but gave up and reverted
-	var requestUrl = getRequestUrl(date);
-	console.log(chalk.yellow(requestUrl));
-	return request(requestUrl, function(error, headers, body){
-		var body = JSON.parse(body);
-		return Currency.create({
-			base: body.base,
-			rates: body.rates,
-			date: body.date
-		}).then(function(result){
-			console.log(date, '...created new record');
-			return result;
-		})
-	});
+Currency.findAll({
+	where: {
+		base: 'USD'
+	}
+}).then(function(results){
+	var allQuotesByDate = {};
+	for (result in results){
+		allQuotesByDate[results[result].date] = results[result].rates 
+	/* { date : {country : rate } } */
+	}
+	days = Object.keys(allQuotesByDate);
+	console.log('days', days);
+	for(day in days){
+		console.log(allQuotesByDate[days[day]])
+	}
 });
-/*
-{ 
-	base: 'eur',              
-	date: '2017-08-17',       
-	rates:                    
-	{ aud: 1.4756,           
-		bgn: 1.9558,           
-		dkk: 7.4354,           
-		gbp: 0.90895,          
-		hkd: 9.1517,           
-		zar: 15.442 
-	} 
-};
-*/
+
+
+
+
+
 

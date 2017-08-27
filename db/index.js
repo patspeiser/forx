@@ -11,7 +11,7 @@ Currency.getPrevious = function(id){
 	var previousId = (id > 1) ? id -1 : id;
 	return this.findById(previousId)
 	.then(function(result){
-		console.log(result.id);
+		return result;
 	});
 };
 
@@ -19,7 +19,7 @@ Currency.getNext = function(id){
 	var nextId = id + 1;
 	return this.findById(nextId)
 	.then(function(result){
-		console.log(result.id);
+		return result;
 	})
 }
 
