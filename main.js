@@ -35,19 +35,41 @@ Currency.findAll({
 		base: 'USD'
 	}
 }).then(function(results){
+/*####################################################################*/
+/*####################################################################*/
+/*####################################################################*/
+/*####################################################################*/
 	var allQuotesByDate = {};
-	for (result in results){
-		allQuotesByDate[results[result].date] = results[result].rates 
-	/* { date : {country : rate } } */
+
+	function getAllQuotesByDate(results){
+		for (result in results){
+			allQuotesByDate[results[result].date] = results[result].rates 
+			/* { date : {country : rate } } */
+		}
+		return allQuotesByDate;
 	}
+
+	allQuotesByDate = getAllQuotesByDate(results);
+
 	days = Object.keys(allQuotesByDate);
-	console.log('days', days);
+	var bank = {};
 	for(day in days){
-		console.log(allQuotesByDate[days[day]])
+		var date = days[day]
+		var quotes = allQuotesByDate[date];
+		for (quote in quotes){
+			if (!bank[quote]){
+				bank[quote] = [ quotes[quote] ]
+			} else {
+				bank[quote].push(quotes[quote]);
+			}
+		} 
 	}
+	console.log(bank);
 });
 
 
+//Currency.getNext(1234).then(function(results){console.log(results); return;})
+//Currency.getPrevious(1234).then(function(results){console.log(results); return;})
 
 
 

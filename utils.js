@@ -6,6 +6,7 @@ module.exports = {
 	reducer: reducer 
 }
 
+
 /*
 //
 //used these to seed DB from fixer API
