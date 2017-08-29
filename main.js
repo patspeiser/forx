@@ -64,7 +64,21 @@ Currency.findAll({
 			}
 		} 
 	}
-	console.log(bank);
+	// can make this stuff mostly class methods
+	var bankItems = Object.keys(bank);
+	for (item in bankItems){
+		var banked = (bank[ bankItems[item] ]);
+		var total = 0;
+		var runs = 0; 
+		for (var i = 0; i < banked.length; i++){
+			total += banked[i]	
+			runs += 1;
+		}
+		console.log( bankItems[item] + ' Average: ' + banked[item], total / runs);
+		//console.log(banked);
+	}
+
+
 });
 
 
