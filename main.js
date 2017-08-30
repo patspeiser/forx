@@ -64,27 +64,49 @@ Currency.findAll({
 			}
 		} 
 	}
-	// can make this stuff mostly class methods
+	//have all quotes by date
+
 	var bankItems = Object.keys(bank);
+	//console.log(bank);
 	for (item in bankItems){
-		var banked = (bank[ bankItems[item] ]);
-		var total = 0;
-		var runs = 0; 
-		for (var i = 0; i < banked.length; i++){
+		var banked = bank[ bankItems[item] ];
+		var total  = 0;
+		var runs   = 0; 
+		var above  = 0
+		
+		for(var i = 0; i < banked.length; i++){
 			total += banked[i]	
-			runs += 1;
+			runs  += 1;
 		}
-		console.log( bankItems[item] + ' Average: ' + banked[item], total / runs);
-		//console.log(banked);
-	}
 
 
+		var storage = {
+			'upOnce': 0,
+			'upTwice': 0,
+			'total'  : 0
+		};
+		
+		for(var i = 0; i < banked.length; i++){
+			storage.total += 1;
+			if (banked[i+2]){
+				if(banked[i+1] > banked[i]){
+					storage.upOnce+=1;	
+					if (banked[i+2] > banked[i+1]){
+						storage.upTwice+=1;
+					}
+				}
+			}	
+		} 
+		var ratioUpOnce  = (storage.upOnce / storage.total).toFixed(10) * 100;
+		var ratioUpTwice = (storage.upTwice / storage.total).toFixed(10) * 100;
+		console.log(  bankItems[item], ratioUpOnce, ratioUpTwice); 
+		//console.log(storage, Math.round(storage.up / storage.total, 5)  );
+		//console.log( bankItems[item] + ' Average: ' + banked[item], total / runs);
+	}	
 });
-
 
 //Currency.getNext(1234).then(function(results){console.log(results); return;})
 //Currency.getPrevious(1234).then(function(results){console.log(results); return;})
-
 
 
 
