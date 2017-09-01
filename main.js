@@ -10,8 +10,16 @@ const path = require('path');
 const socket = require('socket.io-client')(process.env.SOCKET_SERVER || 'http://localhost:3000');
 const server = require( path.join(__dirname + '/server.js') );
 const Currency = require('./db/index.js').models.Currency;
+var blessed = require('blessed');
+var contrib = require('blessed-contrib');
+
 module.exports = app;
 
+
+
+app.get('/', function(req, res, next){
+	res.sendFile(path.join(__dirname + '/index.html'));
+});
 
 var configDate = {
 	start: {
@@ -40,73 +48,40 @@ Currency.findAll({
 /*####################################################################*/
 /*####################################################################*/
 	var allQuotesByDate = {};
+	var allQuotesByCurrency = {};
 
-	function getAllQuotesByDate(results){
+	function getAllQuotesBy(results){
+		/* { date : {country : rate } } */
+		/* { currency : {date : rate } } */
+		var numLoops = 0;
 		for (result in results){
-			allQuotesByDate[results[result].date] = results[result].rates 
-			/* { date : {country : rate } } */
+			resultVal = results[result];
+			allQuotesByDate[resultVal.date] = resultVal.rates 
+			rates = resultVal.rates;
+			for (rate in rates){
+				// do later. group by currency. class method? 
+			}
 		}
-		return allQuotesByDate;
+
+		return { 
+				'currency'	: allQuotesByCurrency, 
+				'date'		: allQuotesByDate 
+				};
 	}
 
-	allQuotesByDate = getAllQuotesByDate(results);
+	allQuotesByDate     = getAllQuotesBy(results).date;
 
 	days = Object.keys(allQuotesByDate);
+	
 	var bank = {};
 	for(day in days){
 		var date = days[day]
 		var quotes = allQuotesByDate[date];
 		for (quote in quotes){
-			if (!bank[quote]){
-				bank[quote] = [ quotes[quote] ]
-			} else {
-				bank[quote].push(quotes[quote]);
+			if (quote == 'EUR'){
+				//console.log(date, quotes[quote]);
 			}
-		} 
-	}
-	//have all quotes by date
-
-	var bankItems = Object.keys(bank);
-	//console.log(bank);
-	for (item in bankItems){
-		var banked = bank[ bankItems[item] ];
-		var total  = 0;
-		var runs   = 0; 
-		var above  = 0
-		
-		for(var i = 0; i < banked.length; i++){
-			total += banked[i]	
-			runs  += 1;
 		}
-
-
-		var storage = {
-			'upOnce': 0,
-			'upTwice': 0,
-			'total'  : 0
-		};
-		
-		for(var i = 0; i < banked.length; i++){
-			storage.total += 1;
-			if (banked[i+2]){
-				if(banked[i+1] > banked[i]){
-					storage.upOnce+=1;	
-					if (banked[i+2] > banked[i+1]){
-						storage.upTwice+=1;
-					}
-				}
-			}	
-		} 
-		var ratioUpOnce  = (storage.upOnce / storage.total).toFixed(10) * 100;
-		var ratioUpTwice = (storage.upTwice / storage.total).toFixed(10) * 100;
-		console.log(  bankItems[item], ratioUpOnce, ratioUpTwice); 
-		//console.log(storage, Math.round(storage.up / storage.total, 5)  );
-		//console.log( bankItems[item] + ' Average: ' + banked[item], total / runs);
-	}	
+	}
 });
-
-//Currency.getNext(1234).then(function(results){console.log(results); return;})
-//Currency.getPrevious(1234).then(function(results){console.log(results); return;})
-
-
 
