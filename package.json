@@ -19,6 +19,7 @@
     "express": "^4.15.4",
     "fixer-io-node": "^1.0.1",
     "pg": "^7.1.2",
+    "plotly.js": "^1.30.0",
     "request": "^2.81.0",
     "sequelize": "^4.4.7",
     "simple-datejs": "^1.0.0",

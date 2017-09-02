@@ -15,8 +15,6 @@ var contrib = require('blessed-contrib');
 
 module.exports = app;
 
-
-
 app.get('/', function(req, res, next){
 	res.sendFile(path.join(__dirname + '/index.html'));
 });
@@ -71,6 +69,8 @@ Currency.findAll({
 
 	allQuotesByDate     = getAllQuotesBy(results).date;
 
+	var values = [];
+
 	days = Object.keys(allQuotesByDate);
 	
 	var bank = {};
@@ -79,9 +79,32 @@ Currency.findAll({
 		var quotes = allQuotesByDate[date];
 		for (quote in quotes){
 			if (quote == 'EUR'){
-				//console.log(date, quotes[quote]);
+				//console.log(date, quote, quotes[quote]);
+				values.push(quotes[quote]);
 			}
 		}
 	}
-});
 
+	var screen = blessed.screen()
+ 	var line = contrib.line(
+		{ style:
+			{ line: "yellow",
+		 	text: "green",
+		 	baseline: "black"},
+		 	xLabelPadding: 3,
+		 	xPadding: 5,
+		 	label: 'Title'
+		 }),
+	data = {
+		x: Object.keys(allQuotesByDate),
+		y: values
+	}
+   screen.append(line) //must append before setting data
+   line.setData([data])
+
+   screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+   	return process.exit(0);
+   });
+
+   screen.render()
+});
