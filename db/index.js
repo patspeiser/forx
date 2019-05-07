@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const db = new Sequelize('postgres://postgres:postgres@localhost/forx', {logging: false});
+const db = new Sequelize('', {logging: false});
 
 var Currency = db.define('currency', {
 		base: { type: Sequelize.STRING },
