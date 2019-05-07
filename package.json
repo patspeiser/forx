@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "cross-env SYNC=true cross-env DATABASE_URL=postgres://localhost/forx nodemon server.js"
+    "start:dev": "cross-env SYNC=true cross-env DATABASE_URL=<> nodemon server.js"
   },
   "author": "",
   "license": "ISC",
